@@ -1,0 +1,86 @@
+name: Deploy CRM Frontend
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: ['**']
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build frontend
+        run: yarn build
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Upload project to server (тільки необхідне)
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: 22
+          source: '.'
+          target: ~/proj-crm-frontend-main
+          strip_components: 0
+          rm: true
+          debug: true
+
+      - name: Deploy Docker container on server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: 22
+          script: |
+            echo "Перехід до каталогу проєкту"
+            cd ~/proj-crm-frontend-main
+
+            echo "Створення SSL сертифікатів (якщо ще не існують)..."
+            mkdir -p ssl
+            if [ ! -f ssl/crm.crt ]; then
+              openssl req -x509 -nodes -days 365 \
+                -newkey rsa:2048 \
+                -keyout ssl/selfsigned.key \
+                -out ssl/selfsigned.crt \
+                -subj "/C=UA/ST=Kyiv/L=Kyiv/O=CRM/OU=IT/CN=crm-project.pp.ua"
+              echo "✅ Самопідписані сертифікати згенеровано"
+            else
+              echo "🔐 Сертифікати вже існують — не генеруємо заново"
+            fi
+
+            echo "Зупинка старого контейнера (якщо є)..."
+            docker stop crmfrontend || true
+            docker rm crmfrontend || true
+
+            echo "Збірка нового Docker-образу..."
+            docker build -t crmfrontend .
+
+            echo "Запуск нового контейнера..."
+            docker run -d \
+              --name crmfrontend \
+              --network crm-network \
+              --restart always \
+              -p 443:443 \
+              crmfrontend
