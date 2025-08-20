@@ -1,0 +1,73 @@
+@use "@/assets/styles/base/_mixins";
+@use "./variables" as *;
+
+*,
+::after,
+::before {
+  box-sizing: border-box;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+ul {
+  margin-top: 0;
+  margin-bottom: 0;
+  padding: 0;
+  list-style: none;
+}
+#app {
+  background-color: #131313;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  font-family: "Avenir Next", sans-serif;
+  margin: 0 auto;
+}
+
+.link {
+  text-decoration: none;
+}
+
+address {
+  font-style: normal;
+}
+
+button {
+  cursor: pointer;
+  padding: 0px;
+}
+a {
+  text-decoration: none;
+}
+.container {
+  margin: 0 auto;
+  padding: 0px 15px;
+}
+/**------- syslog-------**/
+.syslog {
+  max-width: 1600px;
+  margin: 0 auto;
+  background-color: $blue-bk-color;
+  &__container {
+    display: flex;
+    width: 100%;
+  }
+  &__content {
+    width: 100%;
+    flex: 1;
+    background-color: $blue-bk-color;
+  }
+}

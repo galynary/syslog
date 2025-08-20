@@ -1,6 +1,6 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-import "modern-normalize";
+import "@/assets/styles/index.scss";
 import { App } from "./App";
 import { BrowserRouter } from "react-router-dom";
 
@@ -18,7 +18,7 @@ const root = createRoot(rootElem);
 root.render(
   <React.StrictMode>
     <Provider store={store}>
-      <BrowserRouter>
+      <BrowserRouter basename="/syslog">
         <App />
       </BrowserRouter>
     </Provider>

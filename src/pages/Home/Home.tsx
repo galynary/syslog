@@ -1,7 +1,5 @@
 import React from "react";
-
-import Header from "../../components/Header/Header";
-const Home: React.FC = () => {
-  return <Header />;
+const Dashboard: React.FC = () => {
+  return <p>Hello!!!</p>;
 };
-export default Home;
+export default Dashboard;
